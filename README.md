@@ -1,6 +1,6 @@
-![Cloud Run Proxy](assets/img/logo.png)
+![runsd](assets/img/logo.png)
 
-Cloud Run Proxy is a drop-in binary to your container image that runs on
+`runsd` is a drop-in binary to your container image that runs on
 [Cloud Run (fully managed)](https://cloud.run) that allows your services to
 discover each other and authenticate automatically without needing to change
 your code. It helps bringing existing microservices, for example from Kubernetes,
