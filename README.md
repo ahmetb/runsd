@@ -5,7 +5,7 @@ Run (fully managed)](https://cloud.run) that allows your services to discover
 each other and authenticate automatically without needing to change your code.
 
 It helps you bring existing microservices, for example from Kubernetes, to Cloud
-Run. It’s not language-specific and works with external tools and binaries, too.
+Run. It’s not language-specific and works with external tools and binaries.
 
 > **NOTE:** This project is not a support component of Cloud Run. It's developed
 > as a community effort and provided as-is without any guarantees.
@@ -111,3 +111,23 @@ services easily with `curl`.
 1. `runsd` runs an HTTP proxy server on port `80` inside the container. This
    server retrieves identity tokens, adds them to the outgoing requests and
    upgrades the connection to HTTPS.
+
+## Troubleshooting
+
+By default `runsd` does not log anything to your application in order to not
+confuse you or mess with your log collection setup.
+
+If you need to expose more verbose logs, change the entrypoint in your
+Dockerfile from `ENTRYPOINT ["runsd", "--", ...]` to;
+
+    ENTRYPOINT ["runsd", "-v=5", "--", ...]
+
+You can adjust the number based on how much detailed logs you want to see.
+
+If the logs don't help you troubleshoot the issues, feel free to open an issue
+on this repository; however, don’t have any expectations about when it will be
+resolved. Patch and more tests are always welcome.
+
+-----
+
+This is not an official Google project.
