@@ -12,5 +12,6 @@ builds:
     - amd64
 archives:
 - format: binary
+  name_template: "{{ .ProjectName }}"
 checksum:
   disable: true
