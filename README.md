@@ -62,13 +62,13 @@ your original entrypoint with it.
 For example:
 
 ```text
-ADD https://github.com/ahmetb/runsd/releases/download/v0.0.0/runsd /runsd
+ADD https://github.com/ahmetb/runsd/releases/download/<VERSION>/runsd /runsd
 RUN chmod +x /runsd
 ENTRYPOINT ["/runsd", "--", "/app"]
 ```
 
-In the example above, change the version number to a version number in [Releases
-tab](https://github.com/ahmetb/runsd).
+In the example above, change `<VERSION>` to a version number in the [Releases
+page](https://github.com/ahmetb/runsd).
 
 ## Quickstart
 
