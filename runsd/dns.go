@@ -115,6 +115,10 @@ func (d *dnsHijack) recurse(w dns.ResponseWriter, msg *dns.Msg) {
 	r.SetReply(msg)
 	r.RecursionAvailable = true
 	w.WriteMsg(r)
+	klog.V(5).Infof("[dns] recursed type=%s name=%v resp_code=%d",
+		dns.TypeToString[msg.Question[0].Qtype],
+		msg.Question[0].Name,
+		r.Rcode)
 }
 
 // nxdomain sends an authoritative NXDOMAIN (domain not found) reply

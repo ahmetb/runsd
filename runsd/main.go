@@ -27,11 +27,11 @@ import (
 )
 
 const (
-	resolvConf     = "/etc/resolv.conf"
-	internalDomain = "run.internal."
-	defaultNdots   = 4
-	dnsPort        = "53"
-	httpProxyPort  = "80"
+	resolvConf           = "/etc/resolv.conf"
+	internalDomain       = "run.internal."
+	defaultNdots         = 4
+	defaultDnsPort       = "53"
+	defaultHTTPProxyPort = "80"
 )
 
 var (
@@ -55,16 +55,16 @@ var (
 func main() {
 	klog.InitFlags(nil)
 	defer klog.Flush()
-	flag.StringVar(&flResolvConf, "resolv_conf_file", resolvConf, "path to resolv.conf(5) file to read/write")
+	flag.StringVar(&flResolvConf, "resolv_conf_file", resolvConf, "[debug-only] path to resolv.conf(5) file to read/write")
 	flag.StringVar(&flInternalDomain, "domain", internalDomain, "internal domain")
 	flag.IntVar(&flNdots, "ndots", defaultNdots, "ndots setting for resolv conf, e.g. for -domain=a.b. this should be 4")
 	flag.StringVar(&flNameserver, "nameserver", "", "override used nameserver (default: from -resolv_conf_file)")
-	flag.StringVar(&flRegion, "gcp_region", "", "override GCP region (do not infer from metadata svc)")
-	flag.BoolVar(&flSkipDNSServer, "skip_dns_hijack", false, "do not start a DNS server for service discovery")
-	flag.BoolVar(&flSkipHTTPProxyServer, "skip_http_proxy", false, "do not start a HTTP proxy server")
+	flag.StringVar(&flRegion, "gcp_region", "", "[debug-only] override GCP region (do not infer from metadata svc)")
+	flag.BoolVar(&flSkipDNSServer, "skip_dns_hijack", false, "[debug-only] do not start a DNS server for service discovery")
+	flag.BoolVar(&flSkipHTTPProxyServer, "skip_http_proxy", false, "[debug-only] do not start a HTTP proxy server")
 	flag.StringVar(&flProjectHash, "gcp_project_hash", "", "gcp cloud run project hash (or use CLOUD_RUN_PROJECT_HASH")
-	flag.StringVar(&flHTTPProxyPort, "http_proxy_port", httpProxyPort, "reverse proxy port to listen on for loopback interface(s)")
-	flag.StringVar(&flDNSPort, "dns_port", dnsPort, "custom port to start dns server on loopback interface(s), note resolv.conf doesn't support custom ports")
+	flag.StringVar(&flHTTPProxyPort, "http_proxy_port", defaultHTTPProxyPort, "[debug-only] reverse proxy port to listen on for loopback interface(s)")
+	flag.StringVar(&flDNSPort, "dns_port", defaultDnsPort, "[debug-only] custom port to start dns server on loopback interface(s), note resolv.conf doesn't support custom ports")
 	flag.Set("logtostderr", "true")
 	flag.Parse()
 
@@ -73,12 +73,12 @@ func main() {
 	})
 
 	if os.Getenv("PORT") == "80" {
-		klog.Exit("Cloud Run application is set to PORT=80, this conflicts with cloud_run_proxy")
+		klog.Exit("your Cloud Run application is set to run on PORT=80, this conflicts with runsd")
 	}
 
 	posArgs := flag.Args()
 	if len(posArgs) == 0 {
-		klog.Exit("specify subprocess as positional args, e.g: '/cloud_run_proxy -- python3 server.py'")
+		klog.Exit("specify subprocess as positional args, e.g: '/runsd -- python3 server.py'")
 	}
 
 	rc, err := dns.ClientConfigFromFile(flResolvConf)
@@ -99,7 +99,7 @@ func main() {
 	// do not hijack dns for this process
 	net.DefaultResolver = resolver(net.JoinHostPort(useNameserver, "53"))
 
-	onCloudRun := useNameserver == "169.254.169.254"
+	onCloudRun := flRegion != "" || useNameserver == "169.254.169.254"
 	klog.V(1).Infof("on cloudrun: %v", onCloudRun)
 	projectHash := os.Getenv("CLOUD_RUN_PROJECT_HASH") // TODO find a way to infer this from runtime environment
 	if flProjectHash != "" {
