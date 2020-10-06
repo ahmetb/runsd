@@ -9,6 +9,22 @@ to Cloud Run.
 > **NOTE:** This project is not an officially supported component of Cloud Run
 > product. It's provided as-is to be a supplementary utility.
 
+<!--
+  ⚠️ DO NOT UPDATE THE TABLE OF CONTENTS MANUALLY ️️⚠️
+  run `npx markdown-toc -i README.md`.
+
+  Please stick to 80-character line wraps as much as you can.
+-->
+
+<!-- toc -->
+
+- [Sign up to be an alpha user](#sign-up-to-be-an-alpha-user)
+- [Features](#features)
+- [DNS Service Discovery](#dns-service-discovery)
+- [Automatic Service Authentication](#automatic-service-authentication)
+
+<!-- tocstop -->
+
 ## Sign up to be an alpha user
 
 If you’re a Google Cloud Run user, [fill out this form](#) to receive
