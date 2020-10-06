@@ -1,14 +1,14 @@
 ![runsd](assets/img/logo.png)
 
-`runsd` is a drop-in binary to your container image that runs on [Cloud Run
-(fully managed)](https://cloud.run) that allows your services to discover each
-other and authenticate automatically without needing to change your code.
+`runsd` is a drop-in binary to your container image that runs on Google [Cloud
+Run (fully managed)](https://cloud.run) that allows your services to discover
+each other and authenticate automatically without needing to change your code.
 
 It helps you bring existing microservices, for example from Kubernetes, to Cloud
 Run. It’s not language-specific and works with external tools and binaries, too.
 
-> **NOTE:** This project is not an officially supported component of Cloud Run
-> product. It's provided as-is to be a supplementary utility.
+> **NOTE:** This project is not a support component of Cloud Run. It's developed
+> as a community effort and provided as-is without any guarantees.
 
 <!--
   ⚠️ DO NOT UPDATE THE TABLE OF CONTENTS MANUALLY ️️⚠️
@@ -30,15 +30,15 @@ Run. It’s not language-specific and works with external tools and binaries, to
 
 ## Features
 
-runsd its job in your container, entirely in userspace and does
-not need to run with any additional privileges or permissions.
+`runsd` does its job in your container, entirely in userspace and does not need
+to run with any additional privileges or permissions to work.
 
-![Cloud Run Proxy feature list](assets/img/features.png)
+![runsd feature list](assets/img/features.png)
 
 ### DNS Service Discovery
 
-With Cloud Run Proxy, other Cloud Run services in the same GCP project can be
-resolved as `http://SERVICE_NAME[.REGION[.run.internal]]`.
+With `runsd`, other Cloud Run services in the same GCP project can be
+resolved as `http://SERVICE_NAME[.REGION[.run.internal]]`:
 
 ![runsd service discovery](assets/img/sd.png)
 
@@ -48,9 +48,9 @@ To develop Cloud Run services that make requests to each other (for
 example, microservices), you need to fetch an identity token from the metadata
 service and set it as a header on the outbound request.
 
-With Cloud Run Proxy, this is handled for you out-of-the-box, so you don't need
+With `runsd`, this is handled for you out-of-the-box, so you don't need
 to change your code when you bring your services to Cloud Run (from other
-platforms like Kubernetes).
+platforms like Kubernetes) that has name-based DNS resolution:
 
 ![Cloud Run authentication before & after](assets/img/auth_code.png)
 
