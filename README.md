@@ -51,6 +51,22 @@ platforms like Kubernetes).
 
 ![Cloud Run authentication before & after](assets/img/auth_code.png)
 
+## Installation
+
+To install `runsd` in your container, you need to download its binary and prefix
+your original entrypoint with it.
+
+For example:
+
+```text
+ADD https://github.com/ahmetb/runsd/releases/download/v0.0.0/runsd /runsd
+RUN chmod +x /runsd
+ENTRYPOINT ["/runsd", "--", "/app"]
+```
+
+In the example above, change the version number to a version number in [Releases
+tab](https://github.com/ahmetb/runsd).
+
 ## Architecture
 
 ![runsd Architecture Diagram](assets/img/architecture.png)

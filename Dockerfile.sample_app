@@ -1,12 +1,11 @@
-FROM gcr.io/ahmetb-public/cloud-run-proxy AS tool
-
 FROM golang:alpine AS build
 WORKDIR /src/app
 COPY ./sample-app .
 RUN CGO_ENABLED=0 go build -o /app .
 
 FROM alpine
-RUN apk add --no-cache curl
-COPY --from=tool /cloud_run_proxy /cloud_run_proxy
+RUN apk add --no-cache curl bind-tools
 COPY --from=build /app /app
-ENTRYPOINT ["/cloud_run_proxy", "--", "/app"]
+ADD https://github.com/ahmetb/runsd/releases/download/v0.0.0-rc.3/runsd /runsd
+RUN chmod +x /runsd
+ENTRYPOINT ["/runsd", "--", "/app"]
