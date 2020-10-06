@@ -29,7 +29,7 @@ import (
 const (
 	resolvConf            = "/etc/resolv.conf"
 	defaultInternalDomain = "run.internal"
-	defaultNdots          = 3
+	defaultNdots          = 4
 	defaultDnsPort        = "53"
 	defaultHTTPProxyPort  = "80"
 )
@@ -62,7 +62,7 @@ func main() {
 	defer klog.Flush()
 	flag.StringVar(&flResolvConf, "resolv_conf_file", resolvConf, "[debug-only] path to resolv.conf(5) file to read/write")
 	flag.StringVar(&flInternalDomain, "domain", defaultInternalDomain, "internal zone (without a trailing dot)")
-	flag.IntVar(&flNdots, "ndots", defaultNdots, "ndots setting for resolv conf (e.g. for -domain=a.b this should be 3)")
+	flag.IntVar(&flNdots, "ndots", defaultNdots, "ndots setting for resolv conf (e.g. for -domain=a.b this should be 4)")
 	flag.StringVar(&flNameserver, "nameserver", "", "override used nameserver (default: from -resolv_conf_file)")
 	flag.StringVar(&flRegion, "gcp_region", "", "[debug-only] override GCP region (do not infer from metadata svc)")
 	flag.BoolVar(&flSkipDNSServer, "skip_dns_hijack", false, "[debug-only] do not start a DNS server for service discovery")

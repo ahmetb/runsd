@@ -60,7 +60,7 @@ func (d *dnsHijack) handleLocal(w dns.ResponseWriter, msg *dns.Msg) {
 			return
 		}
 
-		parts := strings.SplitN(strings.TrimSuffix(q.Name, "."+d.domain), ".", 2)
+		parts := strings.SplitN(strings.TrimSuffix(q.Name, "."+d.domain+"."), ".", 2)
 		region := parts[1]
 		_, ok := cloudRunRegionCodes[region]
 		if !ok {
