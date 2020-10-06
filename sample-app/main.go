@@ -61,9 +61,9 @@ func home(w http.ResponseWriter, req *http.Request) {
 			</form>
 				<p>Try one of these:
 					<ul>
-						<li><code>http://ktest/req</code>: a public Service in the same region (us-central1)</li>
+						<li><code>http://hello/req</code>: a public Service in the same region (us-central1)</li>
 						<li><code>http://hello-private.asia-east1</code>: a private Service in another region, but same project</li>
-						<li><code>http://hello-private.asia-east1.cloudrun.internal</code>: an internal FQDN</li>
+						<li><code>http://hello-private.asia-east1.run.internal</code>: an internal FQDN</li>
 					</ul>
 				</p>
 			<hr/>

@@ -1,6 +1,6 @@
 FROM golang:alpine AS build
 WORKDIR /src/app
-COPY ./sample-app .
+COPY ./ .
 RUN CGO_ENABLED=0 go build -o /app .
 
 FROM alpine

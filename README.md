@@ -1,10 +1,11 @@
 ![runsd](assets/img/logo.png)
 
-`runsd` is a drop-in binary to your container image that runs on
-[Cloud Run (fully managed)](https://cloud.run) that allows your services to
-discover each other and authenticate automatically without needing to change
-your code. It helps bringing existing microservices, for example from Kubernetes,
-to Cloud Run.
+`runsd` is a drop-in binary to your container image that runs on [Cloud Run
+(fully managed)](https://cloud.run) that allows your services to discover each
+other and authenticate automatically without needing to change your code.
+
+It helps you bring existing microservices, for example from Kubernetes, to Cloud
+Run. It’s not language-specific and works with external tools and binaries, too.
 
 > **NOTE:** This project is not an officially supported component of Cloud Run
 > product. It's provided as-is to be a supplementary utility.
@@ -18,10 +19,12 @@ to Cloud Run.
 
 <!-- toc -->
 
-- [Sign up to be an alpha user](#sign-up-to-be-an-alpha-user)
 - [Features](#features)
-- [DNS Service Discovery](#dns-service-discovery)
-- [Automatic Service Authentication](#automatic-service-authentication)
+  * [DNS Service Discovery](#dns-service-discovery)
+  * [Automatic Service Authentication](#automatic-service-authentication)
+- [Installation](#installation)
+- [Quickstart](#quickstart)
+- [Architecture](#architecture)
 
 <!-- tocstop -->
 
@@ -35,7 +38,7 @@ not need to run with any additional privileges or permissions.
 ### DNS Service Discovery
 
 With Cloud Run Proxy, other Cloud Run services in the same GCP project can be
-resolved as `http://SERVICE_NAME[.REGION[.cloudrun.internal]]`.
+resolved as `http://SERVICE_NAME[.REGION[.run.internal]]`.
 
 ![runsd service discovery](assets/img/sd.png)
 
@@ -66,6 +69,28 @@ ENTRYPOINT ["/runsd", "--", "/app"]
 
 In the example above, change the version number to a version number in [Releases
 tab](https://github.com/ahmetb/runsd).
+
+## Quickstart
+
+You can deploy [this](./sample-app) sample application to Cloud Run to try out
+querying other **private** Cloud Run services  **without tokens** and **without full `.run.app`
+domains** by directly using curl:
+
+```sh
+gcloud alpha run deploy sample-app --platform=managed
+   --region=us-central1 --allow-unauthenticated --source=sample-app \
+   --set-env-vars=CLOUD_RUN_PROJECT_HASH=<HASH>
+```
+
+Above, replace `<HASH>` with the random string part of your Cloud Run URLs (e.g.
+'dpyb4duzqq' if the URLs for your project are 'foo-dpyb4duzqq-uc.run.app').
+
+This sample app [has](./sample-app/Dockerfile) `runsd` as its entrypoint and it
+will show you a form that you can use to query other **private** Cloud Run
+services easily with `curl`.
+
+> **Note:** Do not forget to **delete** this service after you try it out, since
+> it gives unauthenticated access to your private services.
 
 ## Architecture
 

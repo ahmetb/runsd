@@ -52,6 +52,11 @@ var (
 	ipv6OK bool
 )
 
+var (
+	version string = "unknown" // populated by goreleaser
+	commit  string = "unknown" // populated by goreleaser
+)
+
 func main() {
 	klog.InitFlags(nil)
 	defer klog.Flush()
@@ -67,6 +72,8 @@ func main() {
 	flag.StringVar(&flDNSPort, "dns_port", defaultDnsPort, "[debug-only] custom port to start dns server on loopback interface(s), note resolv.conf doesn't support custom ports")
 	flag.Set("logtostderr", "true")
 	flag.Parse()
+
+	klog.V(1).Infof("starting runsd version=%s commit=%s", version, commit)
 
 	new(sync.Once).Do(func() {
 		ipv6OK = ipv6Available()
@@ -106,7 +113,8 @@ func main() {
 		projectHash = flProjectHash
 	}
 	if onCloudRun && projectHash == "" {
-		klog.Exit("CLOUD_RUN_PROJECT_HASH not set (e.g. 'dpyb4duzqq' in foo-dpyb4duzqq-uc.run.app)")
+		klog.Exit("error: CLOUD_RUN_PROJECT_HASH environment variable is not set" +
+			"(e.g. this value is 'dpyb4duzqq' if the URLs for your project are like 'foo-dpyb4duzqq-uc.run.app')")
 	}
 
 	var region string
