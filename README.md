@@ -73,8 +73,8 @@ page](https://github.com/ahmetb/runsd).
 ## Quickstart
 
 You can deploy [this](./example) sample application to Cloud Run to try out
-querying other **private** Cloud Run services  **without tokens** and **without full `.run.app`
-domains** by directly using curl:
+querying other **private** Cloud Run services  **without tokens** and **without
+full `.run.app` domains** by directly using curl:
 
 ```sh
 gcloud alpha run deploy curl-app --platform=managed
