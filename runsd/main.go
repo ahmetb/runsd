@@ -142,7 +142,7 @@ func main() {
 		dnsSrv := &dnsHijack{
 			nameserver: useNameserver,
 			domain:     flInternalDomain,
-			dots:       4,
+			dots:       flNdots,
 			serveIPv6:  ipv6OK,
 		}
 
