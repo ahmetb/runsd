@@ -15,3 +15,5 @@ archives:
   name_template: "{{ .ProjectName }}"
 checksum:
   disable: true
+changelog:
+  skip: true
