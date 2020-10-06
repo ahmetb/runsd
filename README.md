@@ -72,20 +72,20 @@ page](https://github.com/ahmetb/runsd).
 
 ## Quickstart
 
-You can deploy [this](./sample-app) sample application to Cloud Run to try out
+You can deploy [this](./example) sample application to Cloud Run to try out
 querying other **private** Cloud Run services  **without tokens** and **without full `.run.app`
 domains** by directly using curl:
 
 ```sh
-gcloud alpha run deploy sample-app --platform=managed
-   --region=us-central1 --allow-unauthenticated --source=sample-app \
+gcloud alpha run deploy curl-app --platform=managed
+   --region=us-central1 --allow-unauthenticated --source=example \
    --set-env-vars=CLOUD_RUN_PROJECT_HASH=<HASH>
 ```
 
 Above, replace `<HASH>` with the random string part of your Cloud Run URLs (e.g.
 'dpyb4duzqq' if the URLs for your project are 'foo-dpyb4duzqq-uc.run.app').
 
-This sample app [has](./sample-app/Dockerfile) `runsd` as its entrypoint and it
+This sample app [has](./example/Dockerfile) `runsd` as its entrypoint and it
 will show you a form that you can use to query other **private** Cloud Run
 services easily with `curl`.
 

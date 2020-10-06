@@ -61,7 +61,7 @@ func home(w http.ResponseWriter, req *http.Request) {
 			</form>
 				<p>Try one of these:
 					<ul>
-						<li><code>http://hello/req</code>: a public Service in the same region (us-central1)</li>
+						<li><code>http://hello</code>: a public Service in the same region (us-central1)</li>
 						<li><code>http://hello-private.asia-east1</code>: a private Service in another region, but same project</li>
 						<li><code>http://hello-private.asia-east1.run.internal</code>: an internal FQDN</li>
 					</ul>
@@ -73,11 +73,9 @@ func home(w http.ResponseWriter, req *http.Request) {
 # Dockerfile
 ENTRYPOINT ["<b>/runsd</b>", "--", "python3", "server.py"]</pre>
 			<p>
-				No new IAM permissions or code change is necessary!<br/>
-				
+				No new IAM permissions or code change is necessary.<br/>
 			</p><p>
-				<a href="http://doc/1lvC0Yy6AChCk09sp93PIrVM1wDWZWng0CJd7Z86yl2c">Design doc</a>
-				&mdash; Contact:<a href="http://who/ahmetb/">ahmetb@</a>. 
+				[<a href="https://github.com/ahmetb/runsd">View <b>runsd</b> on GitHub</a>]
 			</p>
 		</body>
 	</html>
