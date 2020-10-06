@@ -25,27 +25,21 @@ to Cloud Run.
 
 <!-- tocstop -->
 
-## Sign up to be an alpha user
-
-If you’re a Google Cloud Run user, [fill out this form](#) to receive
-installation instructions. We are actively trying to collect feedback and use
-cases to shape this as a potential feature officially.
-
 ## Features
 
-Cloud Run Proxy does its job in your container, entirely in userspace and does
+runsd its job in your container, entirely in userspace and does
 not need to run with any additional privileges or permissions.
 
 ![Cloud Run Proxy feature list](assets/img/features.png)
 
-## DNS Service Discovery
+### DNS Service Discovery
 
 With Cloud Run Proxy, other Cloud Run services in the same GCP project can be
 resolved as `http://SERVICE_NAME[.REGION[.cloudrun.internal]]`.
 
-![Cloud Run Proxy does service discovery](assets/img/sd.png)
+![runsd service discovery](assets/img/sd.png)
 
-## Automatic Service Authentication
+### Automatic Service Authentication
 
 To develop Cloud Run services that make requests to each other (for
 example, microservices), you need to fetch an identity token from the metadata
@@ -56,3 +50,23 @@ to change your code when you bring your services to Cloud Run (from other
 platforms like Kubernetes).
 
 ![Cloud Run authentication before & after](assets/img/auth_code.png)
+
+## Architecture
+
+![runsd Architecture Diagram](assets/img/architecture.png)
+
+`runsd` has a rather hacky architecture, but most notably does 4 things:
+
+1. `runsd` is the new entrypoint of your container, and it runs your original
+   entrypoint as its subprocess.
+
+1. `runsd` updates `/etc/resolv.conf` of your container with new DNS search
+   domains and sends all DNS queries to `localhost:53`.
+
+1. `runsd` runs a DNS server locally inside your container `localhost:53`. This
+   resolves internal hostnames to a local proxy server inside the container
+   (`localhost:80`) and forwards all other domains to the original DNS resolver.
+
+1. `runsd` runs an HTTP proxy server on port `80` inside the container. This
+   server retrieves identity tokens, adds them to the outgoing requests and
+   upgrades the connection to HTTPS.
