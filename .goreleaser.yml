@@ -10,3 +10,7 @@ builds:
     - linux
   goarch:
     - amd64
+archives:
+- format: binary
+checksum:
+  disable: true
