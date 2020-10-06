@@ -62,9 +62,9 @@ your original entrypoint with it.
 For example:
 
 ```text
-ADD https://github.com/ahmetb/runsd/releases/download/<VERSION>/runsd /runsd
-RUN chmod +x /runsd
-ENTRYPOINT ["/runsd", "--", "/app"]
+ADD https://github.com/ahmetb/runsd/releases/download/<VERSION>/runsd /bin/runsd
+RUN chmod +x /bin/runsd
+ENTRYPOINT ["runsd", "--", "/app"]
 ```
 
 In the example above, change `<VERSION>` to a version number in the [Releases
