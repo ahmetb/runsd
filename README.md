@@ -138,6 +138,7 @@ resolved. Patch and more tests are always welcome.
 
 ## Limitations and Known Issues
 
+1. gRPC does not work as proxy doesn't know how to handle its host header.
 1. HTTP protocol corner cases and streaming (SSE or WebSockets) untested.
 1. All names like `http://NAME` will resolve to a Cloud Run URL even  if they
    don't exist. Therefore, for example, if `http://hello` doesn't exist, it will
