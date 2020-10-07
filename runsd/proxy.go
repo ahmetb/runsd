@@ -113,6 +113,11 @@ func (a authenticatingTransport) RoundTrip(req *http.Request) (*http.Response, e
 	if req.Header.Get("authorization") == "" {
 		req.Header.Set("authorization", "Bearer "+idToken)
 	}
+	ua := req.Header.Get("user-agent")
+	req.Header.Set("user-agent", fmt.Sprintf("runsd version=%s", version))
+	if ua != "" {
+		req.Header.Set("user-agent", req.Header.Get("user-agent")+"; "+ua)
+	}
 	return a.next.RoundTrip(req)
 }
 
