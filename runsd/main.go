@@ -151,21 +151,34 @@ func main() {
 			serveIPv6:  ipv6OK,
 		}
 
+		// TODO reduce copypasta below starting [ipv4/ipv6][udp/tcp] combinations.
 		addrv4 := net.JoinHostPort(ipv4Loopback.String(), flDNSPort)
 		addrv6 := net.JoinHostPort(net.IPv6loopback.String(), flDNSPort)
 		go func() {
-			klog.V(1).Infof("starting dns ipv4 server at %s", addrv4)
-			if err := dnsSrv.newServer(addrv4).ListenAndServe(); err != nil {
-				klog.Fatalf("dns server start failure: %v", err)
+			klog.V(1).Infof("starting dns ipv4 server at udp:%s", addrv4)
+			if err := dnsSrv.newServer("udp", addrv4).ListenAndServe(); err != nil {
+				klog.Fatalf("dns server start failure (udp/ipv4): %v", err)
+			}
+		}()
+		go func() {
+			klog.V(1).Infof("starting dns ipv4 server at tcp:%s", addrv4)
+			if err := dnsSrv.newServer("tcp", addrv4).ListenAndServe(); err != nil {
+				klog.Fatalf("dns server start failure (tcp/ipv4): %v", err)
 			}
 		}()
 		if !ipv6OK {
 			klog.V(1).Infof("skipping ipv6 dns server, stack not available")
 		} else {
-			klog.V(1).Infof("starting dns ipv6 server at %s", addrv6)
 			go func() {
-				if err := dnsSrv.newServer(addrv6).ListenAndServe(); err != nil {
-					klog.Fatalf("ipv6 dns server start failure: %v", err)
+				klog.V(1).Infof("starting dns ipv6 server at udp:%s", addrv6)
+				if err := dnsSrv.newServer("udp", addrv6).ListenAndServe(); err != nil {
+					klog.Fatalf("dns server start failure (udp/ipv6): %v", err)
+				}
+			}()
+			go func() {
+				klog.V(1).Infof("starting dns ipv6 server at tcp:%s", addrv6)
+				if err := dnsSrv.newServer("tcp", addrv6).ListenAndServe(); err != nil {
+					klog.Fatalf("dns server start failure (tcp/ipv6): %v", err)
 				}
 			}()
 		}

@@ -33,7 +33,6 @@ func (d *dnsHijack) handler() dns.Handler {
 	mux := dns.NewServeMux()
 	mux.HandleFunc(d.domain, d.handleLocal)
 	mux.HandleFunc(".", d.recurse)
-	klog.V(1).Infof("dnsmux=%#v", mux)
 	return mux
 }
 
@@ -46,10 +45,10 @@ func loggingHandler(d dns.HandlerFunc) dns.HandlerFunc {
 	}
 }
 
-func (d *dnsHijack) newServer(addr string) *dns.Server {
+func (d *dnsHijack) newServer(net, addr string) *dns.Server {
 	return &dns.Server{
 		Addr:    addr,
-		Net:     "udp",
+		Net:     net,
 		Handler: loggingHandler(d.handler().ServeDNS),
 	}
 }
@@ -125,7 +124,6 @@ func (d *dnsHijack) recurse(w dns.ResponseWriter, msg *dns.Msg) {
 		servfail(w, msg)
 		return
 	}
-	klog.V(5).Infof(r.String())
 	klog.V(5).Infof("[dns] << recursed  type=%s name=%v rcode=%s answers=%d rtt=%v",
 		dns.TypeToString[msg.Question[0].Qtype],
 		msg.Question[0].Name,
