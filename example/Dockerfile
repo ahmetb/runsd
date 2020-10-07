@@ -10,6 +10,6 @@ RUN apk add --no-cache curl bind-tools
 COPY --from=build /app /app
 
 # This is how you integrate with runsd:
-ADD https://github.com/ahmetb/runsd/releases/download/v0.0.0-rc.6/runsd /runsd
+ADD https://github.com/ahmetb/runsd/releases/latest/download/runsd /runsd
 RUN chmod +x /runsd
 ENTRYPOINT ["/runsd", "-v=5", "--", "/app"]
