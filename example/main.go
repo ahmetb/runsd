@@ -16,6 +16,7 @@ package main
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"net/http"
 	"os"
@@ -26,6 +27,8 @@ import (
 func main() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/curl", curl)
+	http.HandleFunc("/dig", dig)
+	http.HandleFunc("/resolv.conf", resolvconf)
 	port := "8080"
 	if v := os.Getenv("PORT"); v != "" {
 		port = v
@@ -107,4 +110,25 @@ func curl(w http.ResponseWriter, req *http.Request) {
 	if err := cmd.Run(); err != nil {
 		fmt.Fprintf(w, "curl failed: %v\n", err)
 	}
+}
+
+func dig(w http.ResponseWriter, r *http.Request) {
+	domain := r.URL.Query().Get("domain")
+	if domain == "" {
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintln(w, "?domain=[...] is missing")
+		return
+	}
+	fmt.Fprintf(w, "$ dig +search A %s\n\n", domain)
+	cmd := exec.Command("dig", "+search", "A", domain)
+	cmd.Stdout = w
+	cmd.Stderr = w
+	if err := cmd.Run(); err != nil {
+		fmt.Fprintf(w, "dig failed: %v\n", err)
+	}
+}
+
+func resolvconf(w http.ResponseWriter, r *http.Request) {
+	f, _ := os.Open("/etc/resolv.conf")
+	io.Copy(w, f)
 }

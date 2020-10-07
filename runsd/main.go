@@ -28,7 +28,7 @@ import (
 
 const (
 	resolvConf            = "/etc/resolv.conf"
-	defaultInternalDomain = "run.internal"
+	defaultInternalDomain = "run.internal."
 	defaultNdots          = 4
 	defaultDnsPort        = "53"
 	defaultHTTPProxyPort  = "80"
@@ -62,7 +62,7 @@ func main() {
 	defer klog.Flush()
 	flag.StringVar(&flResolvConf, "resolv_conf_file", resolvConf, "[debug-only] path to resolv.conf(5) file to read/write")
 	flag.StringVar(&flInternalDomain, "domain", defaultInternalDomain, "internal zone (without a trailing dot)")
-	flag.IntVar(&flNdots, "ndots", defaultNdots, "ndots setting for resolv conf (e.g. for -domain=a.b this should be 4)")
+	flag.IntVar(&flNdots, "ndots", defaultNdots, "ndots setting for resolv conf (e.g. for -domain=a.b. this should be 4)")
 	flag.StringVar(&flNameserver, "nameserver", "", "override used nameserver (default: from -resolv_conf_file)")
 	flag.StringVar(&flRegion, "gcp_region", "", "[debug-only] override GCP region (do not infer from metadata svc)")
 	flag.BoolVar(&flSkipDNSServer, "skip_dns_hijack", false, "[debug-only] do not start a DNS server for service discovery")
@@ -101,7 +101,7 @@ func main() {
 	} else {
 		klog.Exitf("no nameservers in %s and no nameserver is specified as option", flResolvConf)
 	}
-	klog.V(3).Infof("using backend nameserver in process: %s", useNameserver)
+	klog.V(3).Infof("original nameserver: %s, ndots=%d", useNameserver, flNdots)
 
 	// do not hijack dns for this process
 	net.DefaultResolver = resolver(net.JoinHostPort(useNameserver, "53"))
@@ -167,11 +167,11 @@ func main() {
 
 		klog.V(4).Infof("hijacking resolv.conf file=%s", flResolvConf)
 		searchDomains := append(cloudRunZones(region, flInternalDomain), rc.Search...)
-		if err := configureResolvConf(flResolvConf, []string{
-			ipv4Loopback.String(),     // to resolve local domains
-			net.IPv6loopback.String(), // to resolve local domains
-			//useNameserver,             // TODO: probably not necessary to resolve external domains since we return NS records?
-		}, searchDomains, flNdots); err != nil {
+		resolvers := []string{ipv4Loopback.String()}
+		if ipv6OK {
+			resolvers = append(resolvers, net.IPv6loopback.String())
+		}
+		if err := configureResolvConf(flResolvConf, resolvers, searchDomains, flNdots); err != nil {
 			klog.Fatal(err)
 		}
 		klog.V(1).Info("dns hijack setup complete")
