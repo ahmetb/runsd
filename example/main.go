@@ -64,14 +64,16 @@ func home(w http.ResponseWriter, req *http.Request) {
 			</form>
 				<p>Try one of these:
 					<ul>
-						<li><code>http://hello</code>: a public Service in the same region (us-central1)</li>
-						<li><code>http://hello-private.asia-east1</code>: a private Service in another region, but same project</li>
-						<li><code>http://hello-private.asia-east1.run.internal</code>: an internal FQDN</li>
+						<li><code>http://hello</code>: a private Service in the same region and project</li>
+						<li><code>http://hello.asia-east1</code>: a private Service in another region, but same project</li>
+						<li><code>http://hello.asia-east1.run.internal</code>: fully qualified internal name</li>
 					</ul>
 				</p>
 			<hr/>
 			<p>
-				All you need to do is to wrap your original entrypoint with a new process:
+				All you need to do is to prefix your original entrypoint with
+				the <code>runsd</code> binary adding service discovery to your
+				container.
 				<pre>
 # Dockerfile
 ENTRYPOINT ["<b>/runsd</b>", "--", "python3", "server.py"]</pre>
