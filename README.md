@@ -25,6 +25,8 @@ Run. It’s not language-specific and works with external tools and binaries.
 - [Installation](#installation)
 - [Quickstart](#quickstart)
 - [Architecture](#architecture)
+- [Troubleshooting](#troubleshooting)
+- [Limitations and Known Issues](#limitations-and-known-issues)
 
 <!-- tocstop -->
 
@@ -69,6 +71,12 @@ ENTRYPOINT ["runsd", "--", "/app"]
 
 In the example above, change `<VERSION>` to a version number in the [Releases
 page](https://github.com/ahmetb/runsd).
+
+After installing `runsd`, it will have no effect while running locally. However,
+while on Cloud Run, you can now query other services by name over `http://`.
+
+Note that your traffic is still secure –as the request is upgraded to HTTPS
+before it leaves your container.
 
 ## Quickstart
 
@@ -127,6 +135,20 @@ You can adjust the number based on how much detailed logs you want to see.
 If the logs don't help you troubleshoot the issues, feel free to open an issue
 on this repository; however, don’t have any expectations about when it will be
 resolved. Patch and more tests are always welcome.
+
+## Limitations and Known Issues
+
+1. HTTP protocol corner cases and streaming (SSE or WebSockets) untested.
+1. All names like `http://NAME` will resolve to a Cloud Run URL even  if they
+   don't exist. Therefore, for example, if `http://hello` doesn't exist, it will
+   still be routed to a URL as if it existed, and it will get HTTP 404.
+1. Similar to previous item `http://metadata` will be assumed as a Cloud Run
+   service instead of [instance metadata
+   server](https://cloud.google.com/compute/docs/storing-retrieving-metadata).
+   To prevent this, use its FQDN `metadata.google.internal.` with a trailing
+   dot.
+1. No structured logging support, but this should not impact you since the tools
+   is not supposed to log anything except the errors.
 
 -----
 
