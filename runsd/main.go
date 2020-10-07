@@ -20,7 +20,9 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/signal"
 	"sync"
+	"syscall"
 
 	"github.com/miekg/dns"
 	"k8s.io/klog/v2"
@@ -58,6 +60,9 @@ var (
 )
 
 func main() {
+	sigCh := make(chan os.Signal, 1)
+	signal.Notify(sigCh, os.Interrupt, syscall.SIGTERM)
+
 	klog.InitFlags(nil)
 	defer klog.Flush()
 	flag.StringVar(&flResolvConf, "resolv_conf_file", resolvConf, "[debug-only] path to resolv.conf(5) file to read/write")
@@ -73,7 +78,7 @@ func main() {
 	flag.Set("logtostderr", "true")
 	flag.Parse()
 
-	klog.V(1).Infof("starting runsd version=%s commit=%s", version, commit)
+	klog.V(1).Infof("starting runsd version=%s commit=%s pid=%d", version, commit, os.Getpid())
 
 	new(sync.Once).Do(func() {
 		ipv6OK = ipv6Available()
@@ -209,8 +214,25 @@ func main() {
 		cmd = posArgs[0]
 	}
 	klog.V(1).Infof("starting subprocess. cmd=%q argv=%#v", cmd, argv)
-	if err := run(cmd, argv); err != nil {
-		klog.V(1).Info("subprocess terminated")
+	c := exec.Command(cmd, argv...)
+	c.Stdout = os.Stdout
+	c.Stderr = os.Stderr
+	c.Stdin = os.Stdin
+	if err := c.Start(); err != nil {
+		klog.Warningf("failed to start subprocess: %v", err)
+		os.Exit(1)
+	}
+	klog.V(2).Infof("subprocess started successfully pid=%d", c.Process.Pid)
+	go func() {
+		sig := <-sigCh
+		klog.V(2).Infof("received signal=%s", sig)
+		if err := c.Process.Signal(sig); err != nil {
+			klog.Warningf("failed to signal process: %v", err)
+		}
+		klog.V(2).Infof("delivered signal=%s to child=%d", sig, c.Process.Pid)
+	}()
+	if err := c.Wait(); err != nil {
+		klog.Infof("subprocess terminated")
 		if v, ok := err.(*exec.ExitError); ok {
 			ec := v.ExitCode()
 			klog.V(1).Infof("exit_code=%d, pid=%d", ec, v.Pid())
@@ -223,14 +245,6 @@ func main() {
 	klog.V(1).Infof("subprocess exited successfully")
 }
 
-func run(command string, argv []string) error {
-	cmd := exec.Command(command, argv...)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	cmd.Stdin = os.Stdin
-	return cmd.Run()
-}
-
 func ipv6Available() bool {
 	lis, err := net.Listen("tcp6", net.JoinHostPort(net.IPv6loopback.String(), "0"))
 	if err != nil {
@@ -239,8 +253,4 @@ func ipv6Available() bool {
 	}
 	lis.Close()
 	return true
-}
-
-func isOnCloudRun() {
-
 }
