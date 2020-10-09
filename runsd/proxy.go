@@ -18,10 +18,12 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
-	"net/http/httputil"
 	"strings"
 	"time"
 
+	"github.com/elazarl/goproxy"
+	"golang.org/x/net/http2"
+	"golang.org/x/net/http2/h2c"
 	"k8s.io/klog/v2"
 )
 
@@ -40,29 +42,69 @@ func newReverseProxy(projectHash, currentRegion, internalDomain string) *reverse
 }
 
 func (rp *reverseProxy) newHandler() http.Handler {
-	director := func(req *http.Request) {
+	proxy := goproxy.NewProxyHttpServer()
+	proxy.OnRequest().DoFunc(func(req *http.Request, ctx *goproxy.ProxyCtx) (*http.Request, *http.Response) {
+		ctx.UserData = time.Now()
+		klog.V(5).Infof("[proxy] start: method=%s url=%s headers=%d trailers=%d", req.Method, req.URL, len(req.Header), len(req.Trailer))
+		for k, v := range req.Header {
+			klog.V(5).Infof("[proxy]       > hdr=%s v=%#v", k, v)
+		}
 		runHost, err := resolveCloudRunHost(rp.internalDomain, req.Host, rp.currentRegion, rp.projectHash)
 		if err != nil {
 			// this only fails due to region code not being registered –which would be handled
 			// by the DNS resolver so the request should not come here with an invalid region.
-			klog.Warningf("WARN: reverse proxy director failed to find cloud run URL for host=%s: %v", req.Host, err)
-			return // do not rewrite request
+			klog.Warningf("WARN: reverse proxy failed to find a Cloud Run URL for host=%s: %v", req.Host, err)
+			return nil, goproxy.NewResponse(req, "text/plain", http.StatusInternalServerError,
+				fmt.Sprintf("runsd doesn't know how to handle host=%q: %v", req.Host, err))
 		}
 		origHost := req.Host
 		req.URL.Scheme = "https"
 		req.URL.Host = runHost
 		req.Host = runHost
 		req.Header.Set("host", runHost)
-		klog.V(5).Infof("[proxy] rewrite host=%s to=%q", origHost, req.URL)
-	}
+		klog.V(5).Infof("[proxy] rewrote host=%s to=%s newurl=%q", origHost, runHost, req.URL)
 
-	tokenInject := authenticatingTransport{next: http.DefaultTransport}
-	transport := loggingTransport{next: tokenInject}
-	v := &httputil.ReverseProxy{
-		Director:  director,
-		Transport: transport,
-	}
-	return v
+		idToken, err := identityToken("https://" + req.Host)
+		if err != nil {
+			klog.V(1).Infof("WARN: failed to get ID token for host=%s: %v", req.Host, err)
+			resp := new(http.Response)
+			resp.Body = ioutil.NopCloser(strings.NewReader(fmt.Sprintf("failed to fetch metadata token: %v", err)))
+			resp.StatusCode = http.StatusInternalServerError
+			return nil, resp
+		}
+		if req.Header.Get("authorization") == "" {
+			req.Header.Set("authorization", "Bearer "+idToken)
+		}
+		ua := req.Header.Get("user-agent")
+		req.Header.Set("user-agent", fmt.Sprintf("runsd version=%s", version))
+		if ua != "" {
+			req.Header.Set("user-agent", req.Header.Get("user-agent")+"; "+ua)
+		}
+		return req, nil
+	})
+	proxy.OnResponse().DoFunc(func(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
+		start := ctx.UserData
+		var took time.Duration
+		if v, ok := start.(time.Time); ok {
+			took = time.Since(v)
+		}
+		var rcode, hdrs, trailers int
+		if resp != nil {
+			rcode = resp.StatusCode
+			hdrs = len(resp.Header)
+			trailers = len(resp.Trailer)
+			for k, v := range resp.Header {
+				klog.V(7).Infof("[proxy]       < hdr=%s v=%#v", k, v)
+			}
+			for k, v := range resp.Trailer {
+				klog.V(7).Infof("[proxy]       < trailer=%s v=%#v", k, v)
+			}
+		}
+		klog.V(5).Infof("[proxy]   end: method=%s url=%s resp_status=%d headers=%d trailers=%d took=%v",
+			ctx.Req.Method, ctx.Req.URL, rcode, hdrs, trailers, took)
+		return resp
+	})
+	return proxy
 }
 
 func resolveCloudRunHost(internalDomain, hostname, curRegion, projectHash string) (string, error) {
@@ -87,7 +129,7 @@ func resolveCloudRunHost(internalDomain, hostname, curRegion, projectHash string
 
 	rc, ok := cloudRunRegionCodes[svcRegion]
 	if !ok {
-		return "", fmt.Errorf("region %q is not handled (inferred from hostname %s)", svcRegion, hostname)
+		return "", fmt.Errorf("region %q is not handled (inferred from hostname %s), try upgrading runsd", svcRegion, hostname)
 	}
 	return mkCloudRunHost(svc, rc, projectHash), nil
 }
@@ -96,41 +138,16 @@ func mkCloudRunHost(svc, regionCode, projectHash string) string {
 	return fmt.Sprintf("%s-%s-%s.a.run.app", svc, projectHash, regionCode)
 }
 
-type authenticatingTransport struct {
-	next http.RoundTripper
+func absolutify(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// make the request URL absolute by adding a schema
+		// otherwise goproxy complains it "does not respond to non-proxy requests".
+		r.URL.Scheme = "http"
+		next.ServeHTTP(w, r)
+	})
 }
 
-func (a authenticatingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	// TODO convert to roundtripper, maybe?
-	idToken, err := identityToken("https://" + req.Host)
-	if err != nil {
-		klog.V(1).Infof("WARN: failed to get ID token for host=%s: %v", req.Host, err)
-		r := new(http.Response)
-		r.Body = ioutil.NopCloser(strings.NewReader(fmt.Sprintf("failed to fetch metadata token: %v", err)))
-		r.StatusCode = http.StatusInternalServerError
-		return r, nil
-	}
-	if req.Header.Get("authorization") == "" {
-		req.Header.Set("authorization", "Bearer "+idToken)
-	}
-	ua := req.Header.Get("user-agent")
-	req.Header.Set("user-agent", fmt.Sprintf("runsd version=%s", version))
-	if ua != "" {
-		req.Header.Set("user-agent", req.Header.Get("user-agent")+"; "+ua)
-	}
-	return a.next.RoundTrip(req)
-}
-
-type loggingTransport struct {
-	next http.RoundTripper
-}
-
-func (l loggingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
-	start := time.Now()
-	klog.V(5).Infof("[proxy] start: %s url=%s", req.Method, req.URL)
-	defer func() {
-		klog.V(5).Infof("[proxy]   end: %s url=%s took=%s",
-			req.Method, req.URL, time.Since(start).Truncate(time.Millisecond))
-	}()
-	return l.next.RoundTrip(req)
+func allowh2c(next http.Handler) http.Handler {
+	h2server := &http2.Server{IdleTimeout: time.Second * 60}
+	return h2c.NewHandler(next, h2server)
 }

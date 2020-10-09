@@ -22,6 +22,7 @@ import (
 )
 
 var (
+	// TODO needs updating
 	cloudRunRegionCodes = map[string]string{
 		"asia-east1":      "de",
 		"asia-northeast1": "an",

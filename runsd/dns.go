@@ -36,7 +36,7 @@ func (d *dnsHijack) handler() dns.Handler {
 	return mux
 }
 
-func loggingHandler(d dns.HandlerFunc) dns.HandlerFunc {
+func dnsLogger(d dns.HandlerFunc) dns.HandlerFunc {
 	return func(w dns.ResponseWriter, r *dns.Msg) {
 		for i, q := range r.Question {
 			klog.V(5).Infof("[dns] > Q%d: type=%v name=%v", i, dns.TypeToString[q.Qtype], q.Name)
@@ -49,7 +49,7 @@ func (d *dnsHijack) newServer(net, addr string) *dns.Server {
 	return &dns.Server{
 		Addr:    addr,
 		Net:     net,
-		Handler: loggingHandler(d.handler().ServeDNS),
+		Handler: dnsLogger(d.handler().ServeDNS),
 	}
 }
 

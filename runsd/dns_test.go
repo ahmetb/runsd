@@ -16,6 +16,7 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"net"
 	"sort"
 	"testing"
@@ -130,12 +131,12 @@ func TestDNSExternalRecursion(t *testing.T) {
 func newTestDNSServer(t *testing.T, d *dnsHijack) (string, func()) {
 	t.Helper()
 
-	srv := d.newServer("127.0.0.1:9053")
+	srv := d.newServer("udp", "127.0.0.1:9053")
 	ch := make(chan struct{})
 	srv.NotifyStartedFunc = func() { close(ch) }
 	go func() {
 		if err := srv.ListenAndServe(); err != nil {
-			t.Fatalf("failed to start test dns server: %v", err)
+			panic(fmt.Sprintf("failed to start test dns server: %v", err))
 		}
 	}()
 	<-ch
