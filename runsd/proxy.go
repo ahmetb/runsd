@@ -19,6 +19,7 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"net"
 	"net/http"
 	"net/http/httputil"
 	"strings"
@@ -55,8 +56,13 @@ func (rp *reverseProxy) newReverseProxyHandler(tr http.RoundTripper) http.Handle
 		Transport: transport,
 		FlushInterval: -1, // to support grpc streaming responses
 		Director: func(req *http.Request) {
-			klog.V(5).Infof("[proxy] start: method=%s url=%s headers=%d trailers=%d", req.Method, req.URL, len(req.Header), len(req.Trailer))
-			runHost, err := resolveCloudRunHost(rp.internalDomain, req.Host, rp.currentRegion, rp.projectHash)
+			klog.V(5).Infof("[director] receive req host=%s", req.Host)
+			origHost := req.Host
+			if h, p, err := net.SplitHostPort(origHost); err == nil {
+				klog.V(6).Infof("discarding port=%v in host=%s", p, origHost)
+				origHost = h
+			}
+			runHost, err := resolveCloudRunHost(rp.internalDomain, origHost, rp.currentRegion, rp.projectHash)
 			if err != nil {
 				// this only fails due to region code not being registered –which would be handled
 				// by the DNS resolver so the request should not come here with an invalid region.
@@ -71,12 +77,11 @@ func (rp *reverseProxy) newReverseProxyHandler(tr http.RoundTripper) http.Handle
 				*req = *newReq
 				return
 			}
-			origHost := req.Host
 			req.URL.Scheme = "https"
 			req.URL.Host = runHost
 			req.Host = runHost
 			req.Header.Set("host", runHost)
-			klog.V(5).Infof("[proxy] rewrote host=%s to=%s newurl=%q", origHost, runHost, req.URL)
+			klog.V(5).Infof("[director] rewrote host=%s to=%s new_url=%q", origHost, runHost, req.URL)
 		},
 	}
 }
