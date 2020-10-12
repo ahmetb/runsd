@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"time"
 )
 
 func main() {
@@ -105,10 +106,26 @@ func curl(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("content-type", "text/plain; charset=UTF-8")
 
-	fmt.Fprintf(w, "$ curl -sSLv --http2 %s\n\n", url)
-	cmd := exec.Command("curl", "-sSLv", "--http2", url)
+	fmt.Fprintf(w, "$ curl -sSLNv --http2 %s\n\n", url)
+	cmd := exec.CommandContext(req.Context(), "curl", "-sSLNv", "--http2", url)
 	cmd.Stdout = w
 	cmd.Stderr = w
+	go func() {
+		f, ok := w.(http.Flusher)
+		if !ok {
+			log.Printf("ResponseWriter is not a flusher, doesn't support streaming")
+		}
+		t := time.NewTicker(time.Millisecond * 100)
+		defer t.Stop()
+		for {
+			select {
+			case <-t.C:
+				f.Flush()
+			case <-req.Context().Done():
+				return
+			}
+		}
+	}()
 	if err := cmd.Run(); err != nil {
 		fmt.Fprintf(w, "curl failed: %v\n", err)
 	}
