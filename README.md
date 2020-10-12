@@ -157,8 +157,8 @@ resolved. Patch and more tests are always welcome.
 
 ## Limitations and Known Issues
 
-1. HTTP protocol corner cases and streaming (SSE or WebSockets) untested, but
-   they probably work.
+1. Streaming with SSE or gRPC works, however WebSockets are untested. Hopefully
+   your backends aren't talking to each other using WebSockets.
 1. All names like `http://NAME` will resolve to a Cloud Run URL even  if they
    don't exist. Therefore, for example, if `http://hello` doesn't exist, it will
    will still be routed to a URL as if it existed, and it will get HTTP 404.
