@@ -200,7 +200,7 @@ func main() {
 		klog.V(1).Infof("skipping http proxy server initialization")
 	} else {
 		proxy := newReverseProxy(projectHash, region, flInternalDomain)
-		handler := allowh2c(absolutify(proxy.newHandler()))
+		handler := allowh2c(proxy.newReverseProxyHandler(http.DefaultTransport))
 		go func() {
 			addr := net.JoinHostPort(net.IPv4(127, 0, 0, 1).String(), flHTTPProxyPort)
 			klog.Fatalf("reverse proxy (ipv4) fail: %v", http.ListenAndServe(addr, handler))
