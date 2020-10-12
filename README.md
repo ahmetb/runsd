@@ -138,18 +138,18 @@ resolved. Patch and more tests are always welcome.
 
 ## Limitations and Known Issues
 
-1. gRPC does not work as proxy doesn't know how to handle its host header.
-1. HTTP protocol corner cases and streaming (SSE or WebSockets) untested.
+1. HTTP protocol corner cases and streaming (SSE or WebSockets) untested, but
+   they probably work.
 1. All names like `http://NAME` will resolve to a Cloud Run URL even  if they
    don't exist. Therefore, for example, if `http://hello` doesn't exist, it will
-   still be routed to a URL as if it existed, and it will get HTTP 404.
+   will still be routed to a URL as if it existed, and it will get HTTP 404.
 1. Similar to previous item `http://metadata` will be assumed as a Cloud Run
    service instead of [instance metadata
    server](https://cloud.google.com/compute/docs/storing-retrieving-metadata).
    To prevent this, use its FQDN `metadata.google.internal.` with a trailing
    dot.
-1. No structured logging support, but this should not impact you since the tools
-   is not supposed to log anything except the errors.
+1. No structured logging support, but this should not impact you since the
+   runsd binary is not supposed to log anything except the errors by default.
 
 -----
 
