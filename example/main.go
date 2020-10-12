@@ -105,8 +105,8 @@ func curl(w http.ResponseWriter, req *http.Request) {
 
 	w.Header().Set("content-type", "text/plain; charset=UTF-8")
 
-	fmt.Fprintf(w, "$ curl -sSLv %s\n\n", url)
-	cmd := exec.Command("curl", "-sSLv", url)
+	fmt.Fprintf(w, "$ curl -sSLv --http2 %s\n\n", url)
+	cmd := exec.Command("curl", "-sSLv", "--http2", url)
 	cmd.Stdout = w
 	cmd.Stderr = w
 	if err := cmd.Run(); err != nil {

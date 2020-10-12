@@ -53,7 +53,7 @@ func (rp *reverseProxy) newReverseProxyHandler(tr http.RoundTripper) http.Handle
 	transport := loggingTransport{next: tokenInject}
 
 	return &httputil.ReverseProxy{
-		Transport: transport,
+		Transport:     transport,
 		FlushInterval: -1, // to support grpc streaming responses
 		Director: func(req *http.Request) {
 			klog.V(5).Infof("[director] receive req host=%s", req.Host)

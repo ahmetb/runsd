@@ -24,15 +24,19 @@ import (
 var (
 	// TODO needs updating
 	cloudRunRegionCodes = map[string]string{
-		"asia-east1":      "de",
-		"asia-northeast1": "an",
-		"europe-north1":   "lz",
-		"europe-west1":    "ew",
-		"europe-west4":    "ez",
-		"us-central1":     "uc",
-		"us-east1":        "ue",
-		"us-east4":        "uk",
-		"us-west1":        "uw",
+		"asia-east1":              "de",
+		"asia-northeast1":         "an",
+		"asia-northeast2":         "dt",
+		"asia-southeast1":         "as",
+		"australia-southeast1":    "ts",
+		"europe-north1":           "lz",
+		"europe-west1":            "ew",
+		"europe-west4":            "ez",
+		"northamerica-northeast1": "nn",
+		"us-central1":             "uc",
+		"us-east1":                "ue",
+		"us-east4":                "uk",
+		"us-west1":                "uw",
 	}
 )
 
