@@ -78,11 +78,35 @@ while on Cloud Run, you can now query other services by name over `http://`.
 Note that your traffic is still secure –as the request is upgraded to HTTPS
 before it leaves your container.
 
+## Usage
+
+After [installing](#Installation) `runsd` as your new entrypoint, you container
+can now make requests to other Cloud Run services in the same project directly
+by name, e.g. `http://hello`.
+
+Note that:
+
+- You can use `http://hello` to connect to a service within the same region.
+
+- You can use `http://hello.us-central1` notation if the service is deployed
+  in another region (but the same project).
+
+- Do not use `https://` or port `443`. You need to make requests using `http`
+  over port `80` for runsd to work. (HTTPS is added before your request
+  leaves the container.) 
+  
 ## Quickstart
 
 You can deploy [this](./example) sample application to Cloud Run to try out
 querying other **private** Cloud Run services  **without tokens** and **without
-full `.run.app` domains** by directly using curl:
+full `.run.app` domains** by directly using curl.
+
+This sample app [has](./example/Dockerfile) `runsd` as its entrypoint and it
+will show you a form that you can use to query other **private** Cloud Run
+services easily with `curl`.
+
+Below, replace `<HASH>` with the random string part of your Cloud Run URLs (e.g.
+'dpyb4duzqq' if the URLs for your project are 'foo-dpyb4duzqq-uc.run.app').
 
 ```sh
 gcloud alpha run deploy curl-app --platform=managed
@@ -90,12 +114,7 @@ gcloud alpha run deploy curl-app --platform=managed
    --set-env-vars=CLOUD_RUN_PROJECT_HASH=<HASH>
 ```
 
-Above, replace `<HASH>` with the random string part of your Cloud Run URLs (e.g.
-'dpyb4duzqq' if the URLs for your project are 'foo-dpyb4duzqq-uc.run.app').
 
-This sample app [has](./example/Dockerfile) `runsd` as its entrypoint and it
-will show you a form that you can use to query other **private** Cloud Run
-services easily with `curl`.
 
 > **Note:** Do not forget to **delete** this service after you try it out, since
 > it gives unauthenticated access to your private services.
