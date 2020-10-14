@@ -78,7 +78,8 @@ ENTRYPOINT ["runsd", "--", "/app"]
 ```
 
 In the example above, change `<VERSION>` to a version number in the [Releases
-page](https://github.com/ahmetb/runsd).
+page](https://github.com/ahmetb/runsd). It is wise to pick a version and use it
+as long as you can until you hit a bug.
 
 After installing `runsd`, it will have no effect while running locally. However,
 while on Cloud Run, you can now query other services by name over `http://`.
@@ -100,9 +101,9 @@ Note that:
   in another region (but the same project).
 
 - Do not use `https://` or port `443`. You need to make requests using `http`
-  over port `80` for runsd to work. (HTTPS is added before your request
-  leaves the container.) 
-  
+  over port `80` for runsd to work. (HTTPS is added before your request leaves
+  the container.)
+
 ## Quickstart
 
 You can deploy [this](./example) sample application to Cloud Run to try out
@@ -121,8 +122,6 @@ gcloud alpha run deploy curl-app --platform=managed
    --region=us-central1 --allow-unauthenticated --source=example \
    --set-env-vars=CLOUD_RUN_PROJECT_HASH=<HASH>
 ```
-
-
 
 > **Note:** Do not forget to **delete** this service after you try it out, since
 > it gives unauthenticated access to your private services.
