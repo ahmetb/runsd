@@ -86,8 +86,16 @@ func (rp *reverseProxy) newReverseProxyHandler(tr http.RoundTripper) http.Handle
 	}
 }
 
+var _ http.Flusher = authenticatingTransport{} // ensure it's a Flusher
+
 type authenticatingTransport struct {
 	next http.RoundTripper
+}
+
+func (a authenticatingTransport) Flush() {
+	if v, ok := a.next.(http.Flusher); ok {
+		v.Flush()
+	}
 }
 
 func (a authenticatingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
@@ -114,8 +122,16 @@ func (a authenticatingTransport) RoundTrip(req *http.Request) (*http.Response, e
 	return a.next.RoundTrip(req)
 }
 
+var _ http.Flusher = loggingTransport{} // ensure it's a Flusher
+
 type loggingTransport struct {
 	next http.RoundTripper
+}
+
+func (l loggingTransport) Flush() {
+	if v, ok := l.next.(http.Flusher); ok {
+		v.Flush()
+	}
 }
 
 func (l loggingTransport) RoundTrip(req *http.Request) (*http.Response, error) {
