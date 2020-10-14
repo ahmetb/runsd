@@ -40,19 +40,27 @@ to run with any additional privileges or permissions to work.
 ### DNS Service Discovery
 
 With `runsd`, other Cloud Run services in the same GCP project can be
-resolved as `http://SERVICE_NAME[.REGION[.run.internal]]`:
+resolved using hostname `http://SERVICE_NAME[.REGION[.run.internal]]`.
+
+The goal of this project is to provide a solution until Cloud Run has an
+officially supported feature. Therefore, you should not use the fully qualified
+domain name format listed above in your code. Only use formats:
+
+- `http://<SERVICE_NAME>` and
+- `http://<SERVICE_NAME>.<REGION>`.
 
 ![runsd service discovery](assets/img/sd.png)
 
 ### Automatic Service Authentication
 
-To develop Cloud Run services that make requests to each other (for
-example, microservices), you need to fetch an identity token from the metadata
-service and set it as a header on the outbound request.
+Normally, to have Cloud Run services that make requests to each other (for
+example, microservices), your program needs to fetch an identity token from the
+metadata service and set it as a header on the outbound request.
 
-With `runsd`, this is handled for you out-of-the-box, so you don't need
-to change your code when you bring your services to Cloud Run (from other
-platforms like Kubernetes) that has name-based DNS resolution:
+**With `runsd`, this is no longer needed** since authentication handled
+out-of-the-box. This means you don't need to change your code when you bring
+your apps to Cloud Run from other platforms that have name-based DNS resolution
+(such as like Kubernetes or Compute Engine):
 
 ![Cloud Run authentication before & after](assets/img/auth_code.png)
 
