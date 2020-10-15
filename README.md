@@ -7,7 +7,13 @@ each other and authenticate automatically without needing to change your code.
 It helps you bring existing microservices, for example from Kubernetes, to Cloud
 Run. It’s not language-specific and works with external tools and binaries.
 
-> **NOTE:** This project is not a support component of Cloud Run. It's developed
+**Goal:** This tool is developed since Cloud Run does not have built-in service
+discovery and automatic service-to-service authentication features. The goal is
+to provide the functionality until the official features ship. It is expected
+the experience will be quite similar and the migration will be quite easy once
+the official feature becomes available.
+
+> **Note:** This project is not a support component of Cloud Run. It's developed
 > as a community effort and provided as-is without any guarantees.
 
 <!--
