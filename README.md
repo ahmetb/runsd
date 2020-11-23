@@ -1,8 +1,8 @@
 ![runsd](assets/img/logo.png)
 
-`runsd` is a drop-in binary to your container image that runs on Google [Cloud
+**`runsd` is a drop-in binary to your container image that runs on Google [Cloud
 Run (fully managed)](https://cloud.run) that allows your services to discover
-each other and authenticate automatically without needing to change your code.
+each other and authenticate automatically without needing to change your code.**
 
 It helps you bring existing microservices, for example from Kubernetes, to Cloud
 Run. It’s not language-specific and works with external tools and binaries.
