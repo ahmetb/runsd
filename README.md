@@ -72,6 +72,10 @@ your apps to Cloud Run from other platforms that have name-based DNS resolution
 
 ## Installation
 
+> For my tracking purposes, please fill out the form at
+> https://forms.gle/kCgEEiRqrmHhM65g6 if you are using `runsd`.
+> Your feedback will be important in shaping this feature.
+
 To install `runsd` in your container, you need to download its binary and prefix
 your original entrypoint with it.
 
