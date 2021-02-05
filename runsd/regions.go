@@ -25,18 +25,26 @@ var (
 	// TODO needs updating
 	cloudRunRegionCodes = map[string]string{
 		"asia-east1":              "de",
+		"asia-east2":              "df",
 		"asia-northeast1":         "an",
 		"asia-northeast2":         "dt",
+		"asia-northeast3":         "du",
+		"asia-south1 ":            "el",
 		"asia-southeast1":         "as",
+		"asia-southeast2":         "et",
 		"australia-southeast1":    "ts",
 		"europe-north1":           "lz",
 		"europe-west1":            "ew",
+		"europe-west2":            "nw",
+		"europe-west3":            "ey",
 		"europe-west4":            "ez",
+		"europe-west6":            "oa",
 		"northamerica-northeast1": "nn",
 		"us-central1":             "uc",
 		"us-east1":                "ue",
 		"us-east4":                "uk",
 		"us-west1":                "uw",
+		"southamerica-east1":      "rj",
 	}
 )
 
