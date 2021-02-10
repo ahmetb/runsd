@@ -1,3 +1,9 @@
+> :warning: **runsd is currently broken** due to a behavior change in the host
+> nameserver of Cloud Run (169.254.195.254) returning SERVFAIL to unknown
+> domains in "google.internal." zone as oppposed to NXDOMAIN. This issue
+> manifests itself in DNS resolution error in external domains for newly
+> deployed revisions. Right now it's pending a fix on Cloud Run infrastructure.
+
 ![runsd](assets/img/logo.png)
 
 **`runsd` is a drop-in binary to your container image that runs on Google [Cloud
