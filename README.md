@@ -138,7 +138,7 @@ gcloud alpha run deploy curl-app --platform=managed
 
 ## Architecture
 
-![runsd Architecture Diagram](assets/img/architecture.png)
+![runsd Architecture Diagram](assets/img/architecture.svg)
 
 `runsd` has a rather hacky architecture, but most notably does 4 things:
 
