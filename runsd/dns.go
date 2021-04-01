@@ -32,6 +32,15 @@ type dnsHijack struct {
 func (d *dnsHijack) handler() dns.Handler {
 	mux := dns.NewServeMux()
 	mux.HandleFunc(d.domain, d.handleLocal)
+
+	// TODO(ahmetb) issue#18: Cloud Run’s host DNS server is responding to
+	// nonexistent.google.internal. queries with SERVFAIL instead of NXDOMAIN
+	// and this prevents iterating over other "search" domains in resolv.conf.
+	// So, temporarily handling this zone ourselves instead of proxying.
+	// NOTE: This bug is not visible if the Service is running in a VPC access
+	// connector. Internal bug/179796872.
+	mux.HandleFunc("google.internal.", d.tempHandleMetadataZone)
+
 	mux.HandleFunc(".", d.recurse)
 	return mux
 }
@@ -43,6 +52,31 @@ func dnsLogger(d dns.HandlerFunc) dns.HandlerFunc {
 		}
 		d(w, r)
 	}
+}
+
+func (d *dnsHijack) tempHandleMetadataZone(w dns.ResponseWriter, msg *dns.Msg) {
+	for _, q := range msg.Question {
+		if q.Name != "metadata.google.internal." {
+			nxdomain(w, msg)
+			return
+		}
+	}
+	r := new(dns.Msg)
+	r.SetReply(msg)
+	for _, q := range msg.Question {
+		if q.Qtype == dns.TypeA {
+			r.Answer = append(r.Answer, &dns.A{
+				Hdr: dns.RR_Header{
+					Name:   q.Name,
+					Rrtype: dns.TypeA,
+					Class:  dns.ClassINET,
+					Ttl:    300,
+				},
+				A: net.IPv4(169, 254, 169, 254),
+			})
+		}
+	}
+	w.WriteMsg(r)
 }
 
 func (d *dnsHijack) newServer(net, addr string) *dns.Server {
