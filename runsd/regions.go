@@ -32,6 +32,7 @@ var (
 		"asia-southeast1":         "as",
 		"asia-southeast2":         "et",
 		"australia-southeast1":    "ts",
+		"europe-central2":         "lm",
 		"europe-north1":           "lz",
 		"europe-west1":            "ew",
 		"europe-west2":            "nw",
