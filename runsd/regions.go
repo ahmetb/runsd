@@ -38,6 +38,7 @@ var (
 		"europe-west3":            "ey",
 		"europe-west4":            "ez",
 		"europe-west6":            "oa",
+		"europe-central2":         "lm",
 		"northamerica-northeast1": "nn",
 		"southamerica-east1":      "rj",
 		"us-central1":             "uc",
