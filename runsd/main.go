@@ -45,6 +45,7 @@ var (
 	flProjectHash    string
 	flHTTPProxyPort  string
 	flDNSPort        string
+	flUser           string
 
 	flSkipDNSServer       bool
 	flSkipHTTPProxyServer bool
@@ -75,6 +76,7 @@ func main() {
 	flag.StringVar(&flProjectHash, "gcp_project_hash", "", "gcp cloud run project hash (or use CLOUD_RUN_PROJECT_HASH")
 	flag.StringVar(&flHTTPProxyPort, "http_proxy_port", defaultHTTPProxyPort, "[debug-only] reverse proxy port to listen on for loopback interface(s)")
 	flag.StringVar(&flDNSPort, "dns_port", defaultDnsPort, "[debug-only] custom port to start dns server on loopback interface(s), note resolv.conf doesn't support custom ports")
+	flag.StringVar(&flUser, "user", "", "uid or user name to run the app subprocess as")
 	flag.Set("logtostderr", "true")
 	flag.Parse()
 
@@ -86,6 +88,15 @@ func main() {
 
 	if os.Getenv("PORT") == "80" {
 		klog.Exit("your Cloud Run application is set to run on PORT=80, this conflicts with runsd")
+	}
+
+	var uid *uint32
+	if flUser != "" {
+		u, err := resolveUser(flUser)
+		if err != nil {
+			klog.Exitf("cannot resolve user: %v", err)
+		}
+		uid = &u
 	}
 
 	posArgs := flag.Args()
@@ -231,6 +242,15 @@ func main() {
 	c.Stdout = os.Stdout
 	c.Stderr = os.Stderr
 	c.Stdin = os.Stdin
+	if uid != nil {
+		if c.SysProcAttr == nil {
+			c.SysProcAttr = &syscall.SysProcAttr{}
+		}
+		if c.SysProcAttr.Credential == nil {
+			c.SysProcAttr.Credential = &syscall.Credential{}
+		}
+		c.SysProcAttr.Credential.Uid = *uid
+	}
 	if err := c.Start(); err != nil {
 		klog.Warningf("failed to start subprocess: %v", err)
 		os.Exit(1)

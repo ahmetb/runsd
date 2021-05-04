@@ -22,6 +22,7 @@ import (
 	"os"
 	"os/exec"
 	"strings"
+	"syscall"
 	"time"
 )
 
@@ -29,6 +30,7 @@ func main() {
 	http.HandleFunc("/", home)
 	http.HandleFunc("/curl", curl)
 	http.HandleFunc("/dig", dig)
+	http.HandleFunc("/uid", uid)
 	http.HandleFunc("/resolv.conf", resolvconf)
 	port := "8080"
 	if v := os.Getenv("PORT"); v != "" {
@@ -150,4 +152,8 @@ func dig(w http.ResponseWriter, r *http.Request) {
 func resolvconf(w http.ResponseWriter, r *http.Request) {
 	f, _ := os.Open("/etc/resolv.conf")
 	io.Copy(w, f)
+}
+
+func uid(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "uid:%d", syscall.Getuid())
 }
