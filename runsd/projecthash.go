@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
+	"strings"
 
 	"cloud.google.com/go/compute/metadata"
 	"golang.org/x/oauth2/google"
@@ -42,5 +43,12 @@ func getProjectHash(region string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return svc.Status.Url, nil
+	return hashFromURL(svc.Status.Url), nil
+}
+
+func hashFromURL(url string) string {
+	s := strings.TrimSuffix(url, ".a.run.app")
+	tkns := strings.Split(s, "-")
+	hash := tkns[len(tkns)-2]
+	return hash
 }
