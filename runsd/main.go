@@ -124,14 +124,6 @@ func main() {
 
 	onCloudRun := flRegion != "" || useNameserver == "169.254.169.254"
 	klog.V(1).Infof("on cloudrun: %v", onCloudRun)
-	projectHash := os.Getenv("CLOUD_RUN_PROJECT_HASH") // TODO find a way to infer this from runtime environment
-	if flProjectHash != "" {
-		projectHash = flProjectHash
-	}
-	if onCloudRun && projectHash == "" {
-		klog.Exit("error: CLOUD_RUN_PROJECT_HASH environment variable is not set" +
-			"(e.g. this value is 'dpyb4duzqq' if the URLs for your project are like 'foo-dpyb4duzqq-uc.run.app')")
-	}
 
 	var region string
 	if !onCloudRun || flRegion != "" {
@@ -148,6 +140,14 @@ func main() {
 		_, ok := cloudRunRegionCodes[region]
 		if !ok {
 			klog.Exitf("cloud run region %q does not have a region code in this tool yet", region)
+		}
+	}
+
+	projectHash := flProjectHash
+	if onCloudRun && projectHash == "" {
+		projectHash, err = getProjectHash(region)
+		if err != nil {
+			klog.Exitf("failed to infer project hash from admin API: %v", err)
 		}
 	}
 

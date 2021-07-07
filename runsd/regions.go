@@ -76,7 +76,7 @@ func queryMetadata(url string) (string, error) {
 		return "", err // TODO wrap
 	}
 	if resp.StatusCode != http.StatusOK {
-		return "", fmt.Errorf("metadata server responeded with code=%d %s", resp.StatusCode, resp.Status)
+		return "", fmt.Errorf("metadata server responded with code=%d %s", resp.StatusCode, resp.Status)
 	}
 	defer resp.Body.Close()
 	b, err := ioutil.ReadAll(resp.Body)
