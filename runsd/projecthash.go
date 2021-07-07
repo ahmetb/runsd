@@ -20,7 +20,7 @@ func getProjectHash(region string) (string, error) {
 	}
 
 	runAdminURL := fmt.Sprintf(
-		"https://us-%s-run.googleapis.com/apis/serving.knative.dev/v1/namespaces/%s/services/%s",
+		"https://%s-run.googleapis.com/apis/serving.knative.dev/v1/namespaces/%s/services/%s",
 		region, project, os.Getenv("K_SERVICE"))
 	req, err := http.NewRequest(http.MethodGet, runAdminURL, nil)
 	if err != nil {
