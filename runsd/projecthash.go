@@ -47,8 +47,7 @@ func getProjectHash(region string) (string, error) {
 }
 
 func hashFromURL(url string) string {
-	s := strings.TrimSuffix(url, ".a.run.app")
-	tkns := strings.Split(s, "-")
+	tkns := strings.Split(url, "-")
 	hash := tkns[len(tkns)-2]
 	return hash
 }
