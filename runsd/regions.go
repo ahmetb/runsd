@@ -18,6 +18,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"net/http"
+	"regexp"
 	"strings"
 )
 
@@ -51,6 +52,7 @@ var (
 		"us-west3":                "wm",
 		"us-west4":                "wn",
 	}
+	reRegion = regexp.MustCompile(`/zones/([a-z]+-[a-z0-9]+)`)
 )
 
 func regionFromMetadata() (string, error) {
@@ -58,11 +60,11 @@ func regionFromMetadata() (string, error) {
 	if err != nil {
 		return "", err // TODO wrap
 	}
-	vs := strings.SplitAfter(v, "/zones/")
-	if len(vs) != 2 {
-		return "", fmt.Errorf("malformed zone value split into %#v", vs)
+	res := reRegion.FindStringSubmatch(v)
+	if len(res) != 2 {
+		return "", fmt.Errorf("unable to parse zone value %#v from %s", res, v)
 	}
-	return strings.TrimSuffix(vs[1], "-1"), nil
+	return res[1], nil
 }
 
 func queryMetadata(url string) (string, error) {
